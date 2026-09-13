@@ -1,3 +1,207 @@
-@use "./variables.scss" as *;
+// ===== TonyHan Wiki LLM — Custom Design =====
 
-// put your custom CSS here!
+// 1. 글로벌 타이포그래피 개선
+article {
+  font-size: 1rem;
+  line-height: 1.75;
+  letter-spacing: -0.01em;
+  
+  // 제목 스타일
+  h1 {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-top: 2rem;
+  }
+  
+  h2 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-top: 2.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--lightgray);
+  }
+  
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-top: 2rem;
+  }
+  
+  // 인용구 스타일
+  blockquote {
+    border-left: 4px solid var(--secondary);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+    background: var(--highlight);
+    
+    p {
+      margin: 0;
+      font-style: italic;
+    }
+  }
+  
+  // 테이블 스타일
+  table {
+    border-radius: 12px;
+    overflow: hidden;
+    
+    th {
+      background: var(--lightgray);
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 16px;
+    }
+    
+    td {
+      padding: 10px 16px;
+      border-top: 1px solid var(--lightgray);
+    }
+    
+    tr:hover td {
+      background: var(--highlight);
+    }
+  }
+  
+  // 코드 블록
+  pre {
+    border-radius: 12px;
+    padding: 1.2rem;
+    font-size: 0.9rem;
+  }
+  
+  // 링크 호버 효과
+  a {
+    transition: color 0.2s ease, border-color 0.2s ease;
+    
+    &:hover {
+      color: var(--secondary);
+    }
+  }
+  
+  // 리스트 스타일
+  ul, ol {
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.4rem;
+    }
+  }
+  
+  // 강조 표시
+  strong {
+    font-weight: 700;
+    color: var(--secondary);
+  }
+}
+
+// 2. 사이드바 개선
+.sidebar {
+  border-right: 1px solid var(--lightgray);
+  
+  // Explorer 스타일
+  .explorer {
+    .folder {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .file {
+      font-size: 0.85rem;
+      transition: all 0.15s ease;
+      
+      &:hover {
+        color: var(--secondary);
+        transform: translateX(2px);
+      }
+    }
+  }
+}
+
+// 3. 헤더 / 네비게이션
+header {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid var(--lightgray);
+  
+  [data-mode="dark"] & {
+    background: rgba(15, 15, 26, 0.85);
+  }
+}
+
+// 4. 검색 결과
+.search {
+  input {
+    border-radius: 999px !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease;
+    
+    &:focus {
+      box-shadow: 0 0 0 3px var(--highlight);
+    }
+  }
+}
+
+// 5. 그래프 뷰
+.graph {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// 6. 카드 호버 효과 (백링크, 최근 글 등)
+.card {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// 7. 페이지 상단 여백
+.page {
+  padding-top: 1rem;
+  max-width: 800px;
+}
+
+// 8. 푸터
+footer {
+  border-top: 1px solid var(--lightgray);
+  padding: 2rem 0;
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+// 9. 다크모드에서의 스크롤바
+[data-mode="dark"] {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--light);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--gray);
+    border-radius: 4px;
+  }
+}
+
+// 10. 모바일 반응형
+@media (max-width: 768px) {
+  article {
+    font-size: 0.95rem;
+    
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.2rem; }
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

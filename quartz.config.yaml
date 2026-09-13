@@ -17,30 +17,30 @@ configuration:
     fontOrigin: googleFonts
     cdnCaching: true
     typography:
-      header: Schibsted Grotesk
-      body: Source Sans Pro
-      code: IBM Plex Mono
+      header: Noto Sans KR
+      body: Noto Sans KR
+      code: JetBrains Mono
     colors:
       lightMode:
-        light: "#faf8f8"
-        lightgray: "#e5e5e5"
-        gray: "#b8b8b8"
-        darkgray: "#4e4e4e"
-        dark: "#2b2b2b"
-        secondary: "#1428A0"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#fff23688"
+        light: "#ffffff"
+        lightgray: "#f0f0f5"
+        gray: "#c8c8d0"
+        darkgray: "#3d3d4d"
+        dark: "#1a1a2e"
+        secondary: "#6c5ce7"
+        tertiary: "#00cec9"
+        highlight: rgba(108, 92, 231, 0.08)
+        textHighlight: "#ffeaa7"
       darkMode:
-        light: "#161618"
-        lightgray: "#393639"
-        gray: "#646464"
-        darkgray: "#d4d4d4"
-        dark: "#ebebec"
-        secondary: "#1d4ed8"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#b3aa0288"
+        light: "#0f0f1a"
+        lightgray: "#1e1e2e"
+        gray: "#3d3d5c"
+        darkgray: "#c8c8e0"
+        dark: "#f0f0f8"
+        secondary: "#a29bfe"
+        tertiary: "#00cec9"
+        highlight: rgba(162, 155, 254, 0.1)
+        textHighlight: "#6c5ce7"
 plugins:
   - source: "@quartz-community/created-modified-date"
     enabled: true
