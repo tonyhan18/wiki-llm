@@ -1,17 +1,31 @@
 ---
 title: "🚦 프로젝트 진행현황 — 트레이딩 시스템"
-tags: [진행현황, trading-api, 대시보드, 다른PC]
-date: 2026-10-20
+tags: [진행현황, trading-api, 전략, 다른PC]
+date: 2026-10-31
 ---
 
 # 🚦 프로젝트 진행현황 — AI 주식투자 시스템
 
-> **다른 PC 에이전트용 실시간 진행현황 페이지.** 이 페이지는 새 작업 세션이 시작될 때마다 갱신된다.
-> 전체 인수인계는 [trading-api `docs/HANDOFF.md`](https://github.com/tonyhan18/trading-api/blob/main/docs/HANDOFF.md) (365라인 단일 문서)를 읽을 것.
+> **다른 PC 에이전트용 실시간 진행현황 페이지.** 새 작업 세션이 시작될 때마다 갱신된다.
+> 저장소 접근 권한이 있으면 **`AGENTS.md`**(루트, 5분 요약) → `docs/HANDOFF.md`(시스템 전체) → `docs/STRATEGY-LEDGER.md`(전략 계보) 순으로 읽으면 된다.
 
-**최종 갱신**: 2026-10-20 (KST)
-**작성 에이전트**: Hermes Agent (봉순) — Mac
-**최신 커밋**: `7c0f467` devlog 024 · **DevLog**: 025개 (000~024) · **backtests**: 6건
+**최종 갱신**: 2026-10-31 (KST) · **작성**: Hermes Agent(봉순, macOS)
+**최신 커밋**: `c70b098` (docs: AGENTS.md + WEL-v1 최종 보고서)
+**DevLog**: 29개 (000~028) · **백테스트**: 16건 · **전략 세대**: GEN 11
+
+---
+
+## ⚡ 30초 요약 — 지금 가장 중요한 것
+
+| 항목 | 결론 (실측, 데이터 기준일 2026-10-29) |
+|------|------|
+| 확정 전략 | **WEL-v1 (Wave Exit Ladder)** — 사용자 24타점 매수 불변 + 래더 매도 + A20 재진입 20일 금지 |
+| 3.68년 · QQQ 집행 | **CAGR 24.92% · MDD −10.97% · Sharpe 1.63** (QQQ 보유 26.48% / −22.77% / 1.28) |
+| 3.68년 · QLD 집행 | **CAGR 46.23% · MDD −22.71% · Sharpe 1.47** (QLD 보유 45.52% / −42.18% / 1.14) |
+| 10년 · 기계버전 M2+R3+A20 | CAGR 14.62% · MDD −30.51% · **Sharpe 0.90 < QQQ 보유 0.95** → **열세** |
+| 한 줄 판정 | 전략의 가치는 **"같은 수익, 절반의 낙폭"**. 3.68년 수치는 구간 특혜를 포함하므로 10년 결론을 대신하지 않는다 |
+
+**다음 우선순위**: ① 1w 전량매도 → 50% 완화 측정 ② L(손절가)="두 번째 바닥 Low" 정확 산출 ③ 중간 레버리지 1.25~1.5배 측정 ④ 재진입 규칙 확정(사용자 결정)
 
 ---
 
@@ -20,82 +34,94 @@ date: 2026-10-20
 ```
 EC2 3.38.96.46 (t3.small — SSH: ssh -i ~/.ssh/n8n-key.pem ubuntu@3.38.96.46)
 
-trading-api  :8900  NestJS (order·dashboard·heatmap serving)
-collector-api: 8899  RSS/YouTube 수집 (Docker, network host)
-n8n          :5678  수집 스케줄러 (4h → /run 202 async)
-Qdrant       :6333  RAG 벡터 (rss_articles 562 points 100%)
-ollama       :11434 glm-5.3-flash
+trading-api  :8900  NestJS (order·dashboard·heatmap)  /api/status 200
+collector-api: 8899  RSS/YouTube 수집 (Docker, network host)  200
+n8n          :5678  수집 스케줄러 (4h → /run 202 async)        200
+Qdrant       :6333  RAG 벡터                                    200
+ollama       :11434 로컬 LLM
 
-GitHub: tonyhan18/trading-api (private) — Mac ~/trading-api는 clone본
-        commit+push → webhook → EC2 자동재배포 (~45초)
+GitHub: tonyhan18/trading-api (private) — Mac ~/trading-api 는 clone본
+        commit+push → webhook → EC2 자동재배포 (~45초, image digest 고정)
+배포 원본: 저장소 pipeline/ (install_pipeline.py 가 ~/scripts 로 덮어씀 — ~/scripts 직접 수정 금지)
 ```
 
-## ✅ 완료 — 데이터 인프라
+## ✅ 데이터 (실측 2026-10-31)
 
-| 소스 | 규모 | 상태 |
-|------|------|------|
-| RSS·유튜브 4채널 (삼프로TV·한경2·소수몽키·수페TV) | 562건 | ✅ 4h 자동 |
-| Telethon 텔레그램 | 85건 | ✅ |
-| 학회 SMIC 리포트 | 480건 (413 벡터화) | ✅ |
-| 주가 (34종목 + 10년 QQQ·SOXX·SPY·GLD·TLT) | 25,000+ rows | ✅ 평일 KST 16:30 |
-| 섹터 스냅샷 (17섹터) | — | ✅ 평일 KST 16:40 |
-| RAG (Qdrant) | 562 points | ✅ 의미 검색 작동 |
+| 테이블 | 건수 |
+|---|---|
+| rss_articles | 1,903 |
+| telegram_messages | 572 |
+| stock_prices | 41,523 |
+| mirae_reports / club_reports | 298 / 486 |
+| ai_trace | 186 |
+| run_log | 698 |
+| backtests | 16 |
+
+`invest.db` 19MB · **디스크 97% (698M 여유) — docker prune 승인 대기**
 
 ## ⏱️ 자동 파이프라인 (크론탭 KST)
 
 | 시각 | 작업 |
 |------|------|
-| 16:30 | 주가 수집 (pykrx+yfinance 34종목) |
+| 16:30 | 주가 수집 (pykrx + yfinance, 34종목) |
 | 16:40 | daily_insight — 섹터 집계 → LLM 전망 → 히트맵 → 추천 |
 | 16:45 | strategy_engine — MTF·모멘텀·웅덩이 신호 → signal_log |
-| 16:50 | pitbuy — 웅덩이 매매법 (90일 고점 -15% & RSI 7<30) |
+| 16:50 | pitbuy — 웅덩이 매매법 (90일 고점 −15% & RSI7<30) |
 | 17:10 | ai_trader — LLM 매매 의견 |
 | 매 4h | n8n → collector /run |
 
-## 📈 전략 (백테스트 6건 — 자세한 계보는 STRATEGY-LEDGER.md)
+## 📈 전략 계보 (현역 — 상세는 `docs/STRATEGY-LEDGER.md`)
 
-| 전략 | 샤프(단기) | 샤프(10y) | MDD | 판정 |
-|------|-----------|----------|-----|------|
-| 섹터모멘텀 TOP2 (5종) | **1.56** | 0.82 | -20.2% | PASS |
-| MTF 감쇠 분할매도+재진입 | 1.32 | 0.90 | -9.3% | 방어 OK |
-| **MTF+모멘텀 50/50** | 1.41 | **0.91** | -15.5% | 균형 (권장 시작점) |
-| 웅덩이 매매 (R3·R4) | — | — | — | 규칙엔진 통합 |
+| 전략 | 구간 | CAGR | MDD | Sharpe | 판정 |
+|------|------|------|-----|--------|------|
+| **WEL-v1+A20 → QQQ** | 3.68년 | 24.92% | **−10.97%** | **1.63** | ✅ 실전 후보 1순위 |
+| WEL-v1+A20 → QLD(2배) | 3.68년 | 46.23% | −22.71% | 1.47 | OBSERVE (고위험) |
+| M2+R3+A20 (완전 기계) | 10년 | 14.62% | −30.51% | 0.90 | ⚠️ QQQ 보유에 열세 |
+| 모멘텀 TOP2 (5종 자산) | 3년 | 45.3% | −20.2% | 1.56 | ✅ PASS |
+| MTF v2 (감쇠 분할매도) | 10년 | 21.6% | −16.1% | 1.32 | OBSERVE (방어 파트) |
+| MTF+모멘텀 50/50 | 3년 | 30.1% | −15.5% | 1.41 | OBSERVE (구 본선) |
 
-**통과 기준**: 샤프 ≥ 1.5 & MDD ≥ -35% · **계산 법칙**: 현금=가치보존(SHY 3%), 재진입 수량=cash_value/현재가
+**통과 기준**: Sharpe ≥ 1.5 & MDD ≥ −35% · **계산 법칙**: 현금=가치보존(SHY 3%), 재진입 수량 = cash_value / 현재가
+⚠️ **구간 없는 CAGR 인용 금지** — 같은 전략이 3.68년과 10년에서 정반대 결론이 난다.
 
-## 🆕 최근 작업 (10-18 → 10-19)
+## 🆕 최근 작업 (10-27 → 10-31)
 
-| 일자 | 작업 |
-|------|------|
-| 10-19 | devlog 024 — "매매 판단은 금요일, 실행은 월·수" 요일효과 분석 (bootstrap 1,000회, QQQ p=0.069 우연) |
-| 10-19 | FEEDBACK-REQUEST-mtf — 커뮤니티 공유 문서 |
-| 10-18 | devlog 022/023 — strategy_engine 크론 등록, 수페TV 채널 추가 |
-| 10-18 | devlog 020 — weight sweep + 10y 검증 |
-| 10-18 | STRATEGY-LEDGER 원장 신설 · devlog 017 cron TZ 수정 · collector Docker화 (015) |
+| 일자 | 커밋 | 작업 |
+|------|------|------|
+| 10-27 | — | 섹터 선별 × 파동 결합 가능성 평가 (설계 검토) |
+| 10-28 | `5ff1fd0` | 1w=전량매도 고정, 1d/2d 비율 441조합 최적화 |
+| 10-28 | — | 사용자 24타점 정식 평가 · 레버리지(QLD) 비교 · MTF 메인프레임 |
+| 10-29 | `9452b0b` | **WEL-v1 확정** (래더 매도 + A20 재진입 금지) |
+| 10-29 | `1bcb8bd` | 진입 타점 유의성 검증 (무작위 대조군) |
+| 10-29 | `39e0ad0` `c6f57a9` | SCHD 파킹 / TLT·GLD 하락장 방어 비교 |
+| 10-30 | `01ff3ae` | **WEL-v1-M2 완전 기계판** — 10년 검증 |
+| 10-30 | `8a9908d` | 매수 타점 명세 대조 · 정의 역산 |
+| 10-30 | `e998c2a` | **QLD(2배) 집행 평가** — 신호 QQQ / 체결 QLD |
+| 10-31 | `c70b098` | **AGENTS.md 신설** + WEL-v1 최종 보고서 + HANDOFF/LEDGER 갱신 |
 
-## 🚧 진행중 / 대기 (10-19 기준)
+## 🚧 진행중 / 대기
 
 | # | 작업 | 상태 |
 |---|------|------|
-| 1 | Next.js 빌드·배포 (web/ 스캔폴드 완성) | 코드 done — **t3.small swap 필요** → 배포 대기 |
-| 2 | 쇼츠 자동화 (섹터전환 → shorts_script → TTS) | 미착수 |
-| 3 | SHY→TQQQ 스위칭 + 웅덩이 히트맵 연동 | 계획 (devlog 021) |
-| 4 | TG 섹터알림 실발송 (TG_BOT_TOKEN·TG_CHAT_ID) | **사용자만 가능** — 대기 |
-| 5 | 실계좌 키 등록 (KIS·토스·바이낸스·바이비트) | dry-run만 동작 — 대기 |
-| 6 | recommendation_history + /trend (Chart.js) | 로컬 구현 완료, **push 대기 중** |
+| 1 | 1w 전량매도 → 50% 완화 측정 | 대기 (다음 전략 세션 최우선) |
+| 2 | L = "두 번째 바닥 Low" 정확 산출 | 대기 |
+| 3 | 중간 레버리지 1.25~1.5배 측정 | 대기 (현재 수치는 추정) |
+| 4 | 디스크 97% — docker prune | **승인 대기** |
+| 5 | Next.js 빌드·배포 | 코드 done — t3.small swap 필요 |
+| 6 | 쇼츠 자동화 (섹터전환 → shorts_script → TTS) | 미착수 |
+| 7 | TG 섹터알림 실발송 · 실계좌 키 등록 | **사용자만 가능** |
 
 ## 🔑 다른 PC 에이전트 체크리스트
 
-1. `git clone https://github.com/tonyhan18/trading-api.git` (private — 권한 필요)
-2. `docs/HANDOFF.md` 전체 읽기 (365 라인 — 시스템 전체 인수인계)
-3. `docs/STRATEGY-LEDGER.md` — 전략 현재 유효 결론 스냅샷
-4. `docs/devlog/` — 025개 개발일지 (실험 과정·실패 이력)
-5. 웹사이트: `http://3.38.96.46:8900/` · `/autotrade` · `/heatmap`
-6. SSH 키 `~/.ssh/n8n-key.pem` 새 환경으로 복사 필요
+1. `AGENTS.md` (루트) — 5분 요약 · 규칙 · 금지사항
+2. `docs/HANDOFF.md` §0 — 최신 상태 블록 (2026-10-31)
+3. `docs/STRATEGY-LEDGER.md` — 전략 계보 GEN 1~11
+4. `docs/analysis/wel-v1-final-report.md` — **[최신] WEL-v1 · QQQ/QLD 비교 표**
+5. `docs/devlog/000~028` — 실험 과정·실패 이력
+6. 웹: `http://3.38.96.46:8900/` · `/autotrade` · `/heatmap`
+7. SSH 키 `~/.ssh/n8n-key.pem` 를 새 환경으로 복사
 
 ## 시스템 존재 이유
 
 > **"전략이 좋은지 몰라 계속 흔들렸다" → 백테스트·규칙엔진·근거로그로 흔들림 제거.**
 > 질문 프레임: '전략이 좋은가?' → **'지금 신호가 무엇인가?'**
-
-지금은 코스피 90일 고점 대비 -39%의 역사적 웅덩이 구간 — 시스템이 실전에서 처음 증명될 시점.
